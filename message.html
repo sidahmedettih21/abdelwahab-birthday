@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Message | Abdelwahab</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Inter:wght@300;400&family=Cormorant+Garamond:ital,wght@1,400;1,600&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#020204;color:#e0e0e0;font-family:'Inter',sans-serif;height:100vh;overflow:hidden}
+canvas{position:fixed;top:0;left:0;z-index:0}
+.top-nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:center;gap:2rem;padding:1.2rem;background:rgba(2,2,4,0.6);backdrop-filter:blur(12px);border-bottom:1px solid rgba(0,212,255,0.15)}
+.top-nav a{color:#888;text-decoration:none;font-family:'Cinzel Decorative',cursive;font-size:0.8rem;letter-spacing:0.15em;transition:all 0.3s;text-transform:uppercase}
+.top-nav a:hover,.top-nav a.active{color:#00d4ff;text-shadow:0 0 15px rgba(0,212,255,0.8)}
+.page{position:relative;z-index:10;height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
+.glass{background:rgba(10,10,20,0.6);border:1px solid rgba(0,212,255,0.2);backdrop-filter:blur(20px);padding:clamp(2rem,5vw,4rem);max-width:700px;width:100%;border-radius:16px;box-shadow:0 0 60px rgba(0,212,255,0.1),inset 0 0 40px rgba(0,212,255,0.05)}
+.letter{font-family:'Cormorant Garamond',serif;font-size:clamp(1.1rem,2.5vw,1.5rem);line-height:1.8;color:#c0d0e0;font-style:italic}
+.letter br{content:'';display:block;margin-bottom:0.8em}
+.cursor{display:inline-block;width:3px;height:1.1em;background:#00d4ff;margin-left:4px;animation:blink 1s infinite;vertical-align:middle}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.sig{margin-top:2rem;text-align:right;color:#ffd700;font-family:'Cinzel Decorative',cursive;font-size:1rem;letter-spacing:0.1em;opacity:0;transition:opacity 2s}
+.nav-bot{margin-top:2rem;text-align:center;opacity:0;animation:fadeIn 2s forwards;animation-delay:1s}
+.nav-bot a{color:#00d4ff;text-decoration:none;font-family:'Cinzel Decorative',cursive;font-size:0.9rem;border:1px solid rgba(0,212,255,0.3);padding:0.8rem 2rem;display:inline-block;transition:all 0.4s}
+.nav-bot a:hover{background:rgba(0,212,255,0.2);box-shadow:0 0 25px rgba(0,212,255,0.4)}
+@keyframes fadeIn{to{opacity:1}}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<nav class="top-nav">
+  <a href="index.html">The Tempest</a>
+  <a href="puzzles.html">The Trials</a>
+  <a href="message.html" class="active">The Message</a>
+  <a href="final.html">The Calm</a>
+</nav>
+<div class="page">
+  <div class="glass">
+    <div class="letter" id="letter"></div><span class="cursor" id="cur"></span>
+    <div class="sig" id="sig">Happy Birthday, Abdelwahab</div>
+    <div class="nav-bot" id="nb"><a href="final.html" onclick="return go(event,'final.html')">Proceed to The Calm</a></div>
+  </div>
+</div>
+<script>
+const c=document.getElementById('c'),x=c.getContext('2d');
+let w,h;function resize(){w=c.width=innerWidth;h=c.height=innerHeight}addEventListener('resize',resize);resize();
+const stars=Array.from({length:250},()=>({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.5,o:Math.random(),s:Math.random()*0.02+0.005}));
+function draw(){x.fillStyle='#020204';x.fillRect(0,0,w,h);for(let s of stars){s.o+=s.s;if(s.o>1||s.o<0)s.s*=-1;x.fillStyle=`rgba(255,255,255,${Math.abs(s.o)})`;x.beginPath();x.arc(s.x,s.y,s.r,0,Math.PI*2);x.fill()}requestAnimationFrame(draw)}draw();
+
+const text=`Abdelwahab,
+
+Like the storm that commands the sky,
+you carry a force impossible to ignore.
+Not the chaos, but the power.
+The kind that breaks the old world
+to make way for the new.
+
+Today, the thunder sings your name.
+The lightning writes it across the heavens.
+The rain drums a rhythm only your heart knows.
+
+You have weathered another year.
+You have grown stronger, wiser, unbreakable.
+
+May the storms you face always bow to your strength.`;
+let i=0;
+function type(){if(i<text.length){const ch=text.charAt(i);const el=document.getElementById('letter');el.innerHTML+=ch==='\n'?'<br>':ch;i++;setTimeout(type,35+Math.random()*40)}else{document.getElementById('cur').style.display='none';document.getElementById('sig').style.opacity=1;}}setTimeout(type,800);
+function go(e,url){e.preventDefault();document.body.style.transition='opacity 1.2s';document.body.style.opacity=0;setTimeout(()=>location.href=url,1200);return false}
+</script>
+</body>
+</html>
