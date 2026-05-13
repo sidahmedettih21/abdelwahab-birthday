@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Trials | Abdelwahab</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Inter:wght@300;400;600&family=Share+Tech+Mono&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#020204;color:#e0e0e0;font-family:'Inter',sans-serif;height:100vh;overflow:hidden}
+canvas{position:fixed;top:0;left:0;z-index:0}
+.top-nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:center;gap:2rem;padding:1.2rem;background:rgba(2,2,4,0.6);backdrop-filter:blur(12px);border-bottom:1px solid rgba(0,212,255,0.15)}
+.top-nav a{color:#888;text-decoration:none;font-family:'Cinzel Decorative',cursive;font-size:0.8rem;letter-spacing:0.15em;transition:all 0.3s;text-transform:uppercase}
+.top-nav a:hover,.top-nav a.active{color:#00d4ff;text-shadow:0 0 15px rgba(0,212,255,0.8)}
+.page{position:relative;z-index:10;height:100vh;display:flex;flex-direction:column;align-items:center;padding-top:6rem}
+.tabs{display:flex;gap:1rem;margin-bottom:2rem}
+.tab-btn{color:#888;background:none;border:1px solid rgba(0,212,255,0.2);padding:0.6rem 1.4rem;font-family:'Cinzel Decorative',cursive;cursor:pointer;transition:all 0.3s;text-transform:uppercase;font-size:0.8rem;letter-spacing:0.1em}
+.tab-btn:hover,.tab-btn.active{color:#00d4ff;border-color:#00d4ff;box-shadow:0 0 15px rgba(0,212,255,0.3)}
+.tab{display:none;width:min(90vw,700px);animation:fadeIn 0.5s}
+.tab.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* Memory */
+.game-info{display:flex;justify-content:space-between;margin-bottom:1rem;color:#00d4ff;font-size:0.9rem;letter-spacing:0.1em}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0.8rem;width:min(85vw,420px);margin:0 auto}
+.card{aspect-ratio:1;position:relative;cursor:pointer;transform-style:preserve-3d;transition:transform 0.5s}
+.card.flipped{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;display:flex;align-items:center;justify-content:center;font-size:clamp(1.5rem,5vmin,2.5rem);border:1px solid rgba(0,212,255,0.35);border-radius:10px;transition:box-shadow 0.3s}
+.front{background:rgba(0,212,255,0.12);transform:rotateY(180deg);box-shadow:inset 0 0 20px rgba(0,212,255,0.1)}
+.back{background:rgba(0,0,0,0.5);background-image:radial-gradient(circle at 50% 50%,rgba(0,212,255,0.08) 0%,transparent 70%)}
+.card.matched .front{border-color:#ffd700;box-shadow:0 0 25px rgba(255,215,0,0.4),inset 0 0 20px rgba(255,215,0,0.1)}
+.win-msg{text-align:center;margin-top:1.5rem;color:#ffd700;font-family:'Cinzel Decorative',cursive;font-size:1.2rem;opacity:0;transition:opacity 1s}
+
+/* Cipher */
+.terminal{background:rgba(0,0,0,0.7);border:1px solid rgba(0,212,255,0.3);border-radius:8px;padding:2rem;font-family:'Share Tech Mono',monospace}
+.term-header{color:#00d4ff;margin-bottom:1rem;font-size:0.85rem;border-bottom:1px solid rgba(0,212,255,0.2);padding-bottom:0.5rem}
+.cipher-text{color:#ffd700;font-size:1.3rem;letter-spacing:0.2em;margin:1rem 0}
+.term-input{background:transparent;border:none;border-bottom:2px solid #00d4ff;color:#0f0;font-family:'Share Tech Mono',monospace;font-size:1.1rem;width:100%;outline:none;text-transform:uppercase;padding:0.5rem 0;margin:1rem 0}
+.term-btn{background:rgba(0,212,255,0.15);border:1px solid #00d4ff;color:#00d4ff;padding:0.6rem 1.4rem;font-family:'Share Tech Mono',monospace;cursor:pointer;transition:all 0.3s;text-transform:uppercase;margin-top:0.5rem}
+.term-btn:hover{background:rgba(0,212,255,0.3);box-shadow:0 0 20px rgba(0,212,255,0.3)}
+.hint-btn{background:transparent;border:1px solid rgba(255,215,0,0.4);color:#ffd700;margin-left:1rem}
+.result{margin-top:1rem;font-size:1.1rem;min-height:1.5em}
+
+/* Reflex */
+.play-area{position:relative;width:100%;height:350px;border:1px solid rgba(0,212,255,0.25);background:rgba(0,0,0,0.3);border-radius:10px;overflow:hidden;margin-top:1rem}
+.target{position:absolute;width:50px;height:50px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;cursor:pointer;animation:pulse 0.4s infinite;filter:drop-shadow(0 0 8px #ffd700);user-select:none}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}
+.hud{display:flex;justify-content:space-around;margin-bottom:1rem;color:#00d4ff;font-family:'Share Tech Mono',monospace}
+.start-btn{display:block;margin:1rem auto;background:rgba(0,212,255,0.15);border:1px solid #00d4ff;color:#00d4ff;padding:0.8rem 2rem;font-family:'Cinzel Decorative',cursive;cursor:pointer;transition:all 0.3s;text-transform:uppercase}
+.start-btn:hover{background:rgba(0,212,255,0.3);box-shadow:0 0 25px rgba(0,212,255,0.4)}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<nav class="top-nav">
+  <a href="index.html">The Tempest</a>
+  <a href="puzzles.html" class="active">The Trials</a>
+  <a href="message.html">The Message</a>
+  <a href="final.html">The Calm</a>
+</nav>
+<div class="page">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab(0)">Storm Memory</button>
+    <button class="tab-btn" onclick="showTab(1)">Cipher Break</button>
+    <button class="tab-btn" onclick="showTab(2)">Lightning Reflex</button>
+  </div>
+
+  <!-- Memory Game -->
+  <div class="tab active" id="tab0">
+    <div class="game-info"><span id="moves">Moves: 0</span><span id="mtimer">Time: 0s</span></div>
+    <div class="grid" id="grid"></div>
+    <div class="win-msg" id="mwin">THE STORM YIELDS TO YOUR MIND</div>
+  </div>
+
+  <!-- Cipher Game -->
+  <div class="tab" id="tab1">
+    <div class="terminal">
+      <div class="term-header">STORM_DECRYPT v1.0 // PROTOCOL: BIRTHDAY</div>
+      <div>Encrypted transmission intercepted:</div>
+      <div class="cipher-text">KDSSB ELUWKGDB DEGHOZDKDE</div>
+      <div style="color:#888;font-size:0.85rem">Algorithm: Caesar Shift +3</div>
+      <input type="text" class="term-input" id="cinput" placeholder="TYPE DECODED MESSAGE" autocomplete="off">
+      <button class="term-btn" onclick="checkCipher()">Decrypt</button>
+      <button class="term-btn hint-btn" onclick="giveHint()">Hint</button>
+      <div class="result" id="cres"></div>
+    </div>
+  </div>
+
+  <!-- Reflex Game -->
+  <div class="tab" id="tab2">
+    <div class="hud">
+      <div>Score: <span id="score">0</span></div>
+      <div>Time: <span id="rtime">30</span></div>
+      <div>Combo: <span id="combo">x1</span></div>
+    </div>
+    <div class="play-area" id="playArea"></div>
+    <button class="start-btn" id="rstart" onclick="startReflex()">Initiate Sequence</button>
+    <div id="rres" style="text-align:center;margin-top:1rem;color:#ffd700;font-family:'Cinzel Decorative',cursive"></div>
+  </div>
+</div>
+
+<script>
+// Background
+const c=document.getElementById('c'),x=c.getContext('2d');
+let w,h;function resize(){w=c.width=innerWidth;h=c.height=innerHeight}addEventListener('resize',resize);resize();
+const drops=Array.from({length:300},()=>({x:Math.random()*w,y:Math.random()*h,l:Math.random()*20+10,s:Math.random()*10+12,o:Math.random()*0.3+0.1}));
+function draw(){x.fillStyle='rgba(2,2,4,0.25)';x.fillRect(0,0,w,h);x.strokeStyle='rgba(160,180,220,0.25)';x.lineWidth=1;x.beginPath();for(let d of drops){x.moveTo(d.x,d.y);x.lineTo(d.x-1,d.y+d.l);d.y+=d.s;d.x-=1;if(d.y>h){d.y=-d.l;d.x=Math.random()*w}}x.stroke();requestAnimationFrame(draw)}draw();
+
+// Tabs
+function showTab(n){document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===n));document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===n))}
+
+// Memory Game
+const icons=['⚡','🌩️','🌊','🌪️','☁️','🌧️','❄️','💨'];
+let deck=[...icons,...icons].sort(()=>Math.random()-0.5).map(icon=>({icon,matched:false}));
+const grid=document.getElementById('grid');
+deck.forEach((item,i)=>{const card=document.createElement('div');card.className='card';card.innerHTML=`<div class="face back"></div><div class="face front">${item.icon}</div>`;card.onclick=()=>flip(i);grid.appendChild(card);});
+let flipped=[],matched=0,moves=0,canFlip=true,mtime=0,mtimer;
+function flip(i){if(!canFlip||flipped.includes(i)||deck[i].matched)return;const cards=document.querySelectorAll('.card');cards[i].classList.add('flipped');flipped.push(i);if(flipped.length===2){moves++;document.getElementById('moves').textContent='Moves: '+moves;canFlip=false;if(deck[flipped[0]].icon===deck[flipped[1]].icon){matched++;deck[flipped[0]].matched=true;deck[flipped[1]].matched=true;setTimeout(()=>{cards[flipped[0]].classList.add('matched');cards[flipped[1]].classList.add('matched');flipped=[];canFlip=true;if(matched===8){clearInterval(mtimer);document.getElementById('mwin').style.opacity=1;}},500);}else{setTimeout(()=>{cards[flipped[0]].classList.remove('flipped');cards[flipped[1]].classList.remove('flipped');flipped=[];canFlip=true;},900);}}}
+mtimer=setInterval(()=>{mtime++;document.getElementById('mtimer').textContent='Time: '+mtime+'s';},1000);
+
+// Cipher Game
+const plain='HAPPY BIRTHDAY ABDELWAHAB';
+let hintCount=0;
+function checkCipher(){const val=document.getElementById('cinput').value.trim().toUpperCase();const res=document.getElementById('cres');if(val===plain){res.innerHTML='<span style="color:#0f0">ACCESS GRANTED. MESSAGE DECODED.</span>';document.querySelector('.cipher-text').style.color='#0f0';}else{res.innerHTML='<span style="color:#f55">ACCESS DENIED. TRY AGAIN.</span>';}}
+function giveHint(){const hints=['H is the first letter','It is a birthday message','Second word: BIRTHDAY','Third word: ABDELWAHAB'];if(hintCount<hints.length){document.getElementById('cres').innerHTML='<span style="color:#ffd700">HINT: '+hints[hintCount]+'</span>';hintCount++;}}
+
+// Reflex Game
+let rscore=0,rcombo=0,rtime=30,ractive=false,rtimer,rspawn;
+function startReflex(){rscore=0;rcombo=0;rtime=30;ractive=true;document.getElementById('rstart').style.display='none';document.getElementById('rres').textContent='';updateRHud();rtimer=setInterval(()=>{rtime--;updateRHud();if(rtime<=0)endReflex();},1000);spawnTarget();}
+function updateRHud(){document.getElementById('score').textContent=rscore;document.getElementById('rtime').textContent=rtime;document.getElementById('combo').textContent='x'+(1+Math.floor(rcombo/3));}
+function spawnTarget(){if(!ractive||rtime<=0)return;const area=document.getElementById('playArea');area.innerHTML='';const t=document.createElement('div');t.className='target';t.innerHTML='⚡';t.style.left=Math.random()*85+5+'%';t.style.top=Math.random()*75+10+'%';t.onmousedown=()=>{rscore+=10*(1+Math.floor(rcombo/3));rcombo++;updateRHud();spawnTarget();};area.appendChild(t);let life=800-Math.min(rscore*5,400);rspawn=setTimeout(()=>{if(t.parentNode){t.remove();rcombo=0;updateRHud();spawnTarget();}},life);}
+function endReflex(){ractive=false;clearInterval(rtimer);clearTimeout(rspawn);document.getElementById('playArea').innerHTML='';document.getElementById('rstart').style.display='block';document.getElementById('rres').textContent='SEQUENCE COMPLETE. SCORE: '+rscore;}
+</script>
+</body>
+</html>
