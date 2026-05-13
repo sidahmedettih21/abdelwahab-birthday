@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Calm | Abdelwahab</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Inter:wght@300;400&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#020204;color:#e0e0e0;font-family:'Inter',sans-serif;height:100vh;overflow:hidden}
+canvas{position:fixed;top:0;left:0;z-index:0}
+.top-nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:center;gap:2rem;padding:1.2rem;background:rgba(2,2,4,0.6);backdrop-filter:blur(12px);border-bottom:1px solid rgba(0,212,255,0.15)}
+.top-nav a{color:#888;text-decoration:none;font-family:'Cinzel Decorative',cursive;font-size:0.8rem;letter-spacing:0.15em;transition:all 0.3s;text-transform:uppercase}
+.top-nav a:hover,.top-nav a.active{color:#00d4ff;text-shadow:0 0 15px rgba(0,212,255,0.8)}
+.page{position:relative;z-index:10;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem}
+.wish-btn{background:rgba(0,212,255,0.1);border:2px solid #00d4ff;color:#00d4ff;padding:1.2rem 3rem;font-family:'Cinzel Decorative',cursive;font-size:1.1rem;cursor:pointer;transition:all 0.5s;letter-spacing:0.2em;text-transform:uppercase;position:relative;overflow:hidden}
+.wish-btn:hover{transform:scale(1.05);box-shadow:0 0 40px rgba(0,212,255,0.6);background:rgba(0,212,255,0.2)}
+.wish-btn::after{content:'';position:absolute;top:50%;left:50%;width:0;height:0;background:rgba(255,255,255,0.3);border-radius:50%;transform:translate(-50%,-50%);transition:width 0.6s,height 0.6s}
+.wish-btn:active::after{width:300px;height:300px;opacity:0;transition:0s}
+.final-text{font-family:'Cinzel Decorative',cursive;font-size:clamp(1.5rem,5vw,3.5rem);color:#ffd700;text-shadow:0 0 40px rgba(255,215,0,0.6);opacity:0;transform:scale(0.9);transition:all 2s ease-out;margin-top:2rem}
+.final-text.show{opacity:1;transform:scale(1)}
+.sub{opacity:0;transition:opacity 2s;margin-top:1rem;color:#aaa;letter-spacing:0.3em;font-size:0.9rem;text-transform:uppercase}
+.sub.show{opacity:1}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<nav class="top-nav">
+  <a href="index.html">The Tempest</a>
+  <a href="puzzles.html">The Trials</a>
+  <a href="message.html">The Message</a>
+  <a href="final.html" class="active">The Calm</a>
+</nav>
+<div class="page">
+  <button class="wish-btn" id="btn" onclick="makeWish()">Release The Storm</button>
+  <div class="final-text" id="ft">Happy Birthday<br>Abdelwahab</div>
+  <div class="sub" id="sub">May your year be legendary</div>
+</div>
+<script>
+const c=document.getElementById('c'),x=c.getContext('2d');
+let w,h;function resize(){w=c.width=innerWidth;h=c.height=innerHeight}addEventListener('resize',resize);resize();
+
+let mode='storm';
+let particles=[];
+for(let i=0;i<400;i++)particles.push({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-0.5)*2,vy:Math.random()*5+8,life:1,type:'rain'});
+let burst=[];
+
+function makeWish(){document.getElementById('btn').style.display='none';mode='absorb';setTimeout(()=>{mode='burst';for(let i=0;i<300;i++){const a=Math.random()*Math.PI*2;const v=Math.random()*8+2;burst.push({x:w/2,y:h/2,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:1,color:Math.random()>0.5?'#ffd700':'#00d4ff'})}setTimeout(()=>{mode='calm';document.getElementById('ft').classList.add('show');document.getElementById('sub').classList.add('show');},2500);},2500);}
+
+function draw(){
+  if(mode==='storm'||mode==='absorb'){x.fillStyle='rgba(2,2,4,0.25)';x.fillRect(0,0,w,h);}
+  else if(mode==='burst'){x.fillStyle='rgba(2,2,4,0.15)';x.fillRect(0,0,w,h);}
+  else{x.fillStyle='#020204';x.fillRect(0,0,w,h);}
+
+  if(mode==='storm'){
+    x.strokeStyle='rgba(160,180,220,0.3)';x.lineWidth=1;x.beginPath();
+    for(let p of particles){x.moveTo(p.x,p.y);x.lineTo(p.x-1,p.y+15);p.y+=p.vy;p.x-=0.5;if(p.y>h){p.y=-20;p.x=Math.random()*w}}x.stroke();
+  }
+  else if(mode==='absorb'){
+    x.strokeStyle='rgba(160,180,220,0.3)';x.lineWidth=1;x.beginPath();
+    for(let p of particles){const dx=w/2-p.x,dy=h/2-p.y;p.x+=dx*0.03;p.y+=dy*0.03+2;x.moveTo(p.x,p.y);x.lineTo(p.x-dx*0.05,p.y+10);}x.stroke();
+  }
+  else if(mode==='burst'){
+    for(let b of burst){x.fillStyle=b.color;x.globalAlpha=b.life;x.beginPath();x.arc(b.x,b.y,3,0,Math.PI*2);x.fill();b.x+=b.vx;b.y+=b.vy;b.vy+=0.05;b.life-=0.008;}x.globalAlpha=1;
+  }
+  else if(mode==='calm'){
+    for(let p of particles){if(p.type!=='star'){p.type='star';p.x=Math.random()*w;p.y=Math.random()*h;p.vx=0;p.vy=0;p.life=Math.random();}p.life+=0.01;if(p.life>1)p.life=0;x.fillStyle=`rgba(255,255,255,${p.life})`;x.beginPath();x.arc(p.x,p.y,Math.random()*1.5,0,Math.PI*2);x.fill();}
+  }
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
+</body>
+</html>
